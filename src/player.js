@@ -3,11 +3,10 @@ function Player(gamestate){
     this.game = this.gamestate.game;
     
     Phaser.Sprite.call(this, this.game, 100, 100, "player");
-    
+
     this.gun = this.game.add.sprite(0,0, "gun");
     //this.addChild(this.gun);
     this.anchor.setTo(0.5,0.5);
-    
     
     this.gun.anchor.setTo(0.5, 0.5);
     this.gun.x = 50;
@@ -27,12 +26,14 @@ function Player(gamestate){
     this.body.allowGravity = true;
     
     this.shots = this.game.add.group();
+    
     for(var i = 0; i < 20; i++){
         var shot = this.game.add.sprite(0,0,'shot');
         
         shot.kill();
         this.shots.add(shot, true);
     }
+    
     this.game.input.keyboard.onDownCallback = this.throwRope.bind(this);
     this.game.input.keyboard.onUpCallback = this.keyUp.bind(this);
      this.game.input.keyboard.onDownCallback = this.keyDown.bind(this);
@@ -49,7 +50,6 @@ Player.prototype.constructor = Player;
 Player.prototype.keyDown = function(event){
     if(event.keyCode == Phaser.KeyCode.SPACEBAR){
         this.throwRope();
-        this.throwRope();
     }
 }
 Player.prototype.keyUp = function(){
@@ -62,7 +62,7 @@ Player.prototype.killRope = function(){
 }
 Player.prototype.throwRope = function(){
     if(!this.rope.alive){
-        this.rope.throw(this, this.direction);
+        this.rope.throw(this, {x:-1,y:-1});
     }
 }
 Player.prototype.shot = function(){
@@ -126,7 +126,9 @@ Player.prototype.shotCollideEnemy = function(shot, enemy){
 Player.prototype.update = function(){
     
     this.game.physics.arcade.collide(this.shots, this.gamestate.zombieGroup, this.shotCollideEnemy.bind(this));
+    
     this.rotateGun();
+    
     if(this.walkSpeed < 0){
         this.scale.x = -1;
         this.gun.scale.y = -1;
@@ -173,8 +175,8 @@ Player.prototype.update = function(){
         this.game.physics.arcade.collide(this.rope, this.gamestate.wallGroup, this.rope.onCollideWall, null, this.rope);
     }
     
-    this.game.debug.cameraInfo(this.game.camera, 32, 32);
-    this.game.debug.spriteCoords(this, 32, 500);
+    //this.game.debug.cameraInfo(this.game.camera, 32, 32);
+   // this.game.debug.spriteCoords(this, 32, 500);
     
 }
 

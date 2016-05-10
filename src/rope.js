@@ -6,14 +6,18 @@ function Rope(game){
     this.width = 10;
     this.height = 10;
     this.origin = null;
-    this.graphics = this.game.add.graphics(0,0);
-    this.game.physics.arcade.enable(this);
-    
-    this.body.allowGravity = false;
     this.anchor.setTo(0.5,0.5);
+    
+    this.graphics = this.game.add.graphics(0,0);
+    
+    this.game.physics.arcade.enable(this);
+    this.body.allowGravity = false;
+    
+    
     //this.onKilled.add(function(this.graphics.kill()).bind(this));
     this.collided = false;
     this.makeMeAlive = false;
+    this.forceAcceleration = 30;
     this.kill();
 }
 
@@ -35,16 +39,13 @@ Rope.prototype.throw = function(origin, direction){
 }
 Rope.prototype.onCollideWall = function(me, other){
 
-    console.log(this.alive);
-    console.log(this.collided);
     if(!this.alive){
         return;
     }
     if(this.collided){
         return;
     }
-    console.log("collided! %o", other);
-    console.log("%o", me);
+    
     this.collided = true;
     this.body.velocity.setTo(0,0);
     

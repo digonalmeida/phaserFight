@@ -23,7 +23,7 @@ BootState.prototype.createWalls = function(){
 }
 
 BootState.prototype.createZombies = function(){
-    for(var i = 0; i < 100; i ++){
+    for(var i = 0; i < 5; i ++){
         var zombie = new Zombie(this);
         zombie.x = Math.random() * 1900;
         zombie.y = Math.random() * 1900;
@@ -54,7 +54,7 @@ BootState.prototype.create = function(){
     this.game.physics.arcade.gravity.y = 400;
     
     this.createWalls();
-    this.createZombies();
+    //this.createZombies();
     
     this.game.stage.backgroundColor = 0xeeeeff;
     this.player = new Player(this);
