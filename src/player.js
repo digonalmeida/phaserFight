@@ -1,7 +1,8 @@
-function Player(game){
-    this.game = game;
+function Player(gamestate){
+    this.gamestate = gamestate;
+    this.game = this.gamestate.game;
     
-    Phaser.Sprite.call(this, game, 100, 100, "player");
+    Phaser.Sprite.call(this, this.game, 100, 100, "player");
     
     this.gun = this.game.add.sprite(0,0, "gun");
     //this.addChild(this.gun);
@@ -32,14 +33,38 @@ function Player(game){
         shot.kill();
         this.shots.add(shot, true);
     }
-    //this.game.input.onDown.add(this.shot, this);
+    this.game.input.keyboard.onDownCallback = this.throwRope.bind(this);
+    this.game.input.keyboard.onUpCallback = this.keyUp.bind(this);
+     this.game.input.keyboard.onDownCallback = this.keyDown.bind(this);
+    this.rope = new Rope(this.game);
     
     this.walkSpeed = 0;
     this.canJump = true;
+    this.body.collideWorldBounds = true;
 }
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
+
+Player.prototype.keyDown = function(event){
+    if(event.keyCode == Phaser.KeyCode.SPACEBAR){
+        this.throwRope();
+        this.throwRope();
+    }
+}
+Player.prototype.keyUp = function(){
+    if(event.keyCode == Phaser.KeyCode.SPACEBAR){
+        this.killRope();
+    }
+}
+Player.prototype.killRope = function(){
+    this.rope.kill();
+}
+Player.prototype.throwRope = function(){
+    if(!this.rope.alive){
+        this.rope.throw(this, this.direction);
+    }
+}
 Player.prototype.shot = function(){
     this.canShoot = false;
     
@@ -57,14 +82,14 @@ Player.prototype.shot = function(){
     this.game.time.events.add(Phaser.Timer.SECOND * this.shotInterval, function(){this.canShoot = true}.bind(this), this);
     this.game.time.events.add(Phaser.Timer.SECOND * 2, shot.kill, shot);
     
-    shot.tint = 0xffff00;
-    
+    shot.tint = 0xffff00; 
 }
+
 Player.prototype.rotateGun = function(){
-    var mx = this.game.input.activePointer.x - this.x;
-    var my = this.game.input.activePointer.y - this.y;
+    var mx = this.game.input.activePointer.worldX - this.x;
+    var my = this.game.input.activePointer.worldY - this.y;
     var mmod = Math.sqrt(Math.pow(mx,2) + Math.pow(my,2));
-    
+    //console.log(mx + ", " + my);
     this.direction = {
         x: mx / mmod,
         y: my / mmod
@@ -88,26 +113,68 @@ Player.prototype.collideWithFloor = function(){
 Player.prototype.jump = function(){
     this.body.velocity.y = -200;   
     this.canJump = false;
+    
+}
+
+Player.prototype.shotCollideEnemy = function(shot, enemy){
+    shot.kill();
+    enemy.life--;
+    if(enemy.life <= 0){
+        enemy.kill();
+    }
 }
 Player.prototype.update = function(){
+    
+    this.game.physics.arcade.collide(this.shots, this.gamestate.zombieGroup, this.shotCollideEnemy.bind(this));
     this.rotateGun();
+    if(this.walkSpeed < 0){
+        this.scale.x = -1;
+        this.gun.scale.y = -1;
+    }
+    else if(this.walkSpeed > 0){
+        this.scale.x = 1;
+        this.gun.scale.y = 1;
+    }
     if(this.game.input.activePointer.isDown && this.canShoot){
         this.shot();   
     }
     this.walkSpeed = 0;
     if(this.game.input.keyboard.isDown(Phaser.KeyCode.A)){
-           this.walkSpeed = -100;
+           this.walkSpeed = -20;
     }
     if(this.game.input.keyboard.isDown(Phaser.KeyCode.D)){
-           this.walkSpeed = 100;
+           this.walkSpeed = 20;
     }
-    if(this.game.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR) &&
+    if(this.game.input.keyboard.isDown(Phaser.KeyCode.W) &&
       this.canJump){
         
            this.jump();
     }
+    if(this.game.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)){
+      //  this.throwRope();
+    }
+    if(!this.rope.alive || !this.rope.collided){
+        if(Math.abs(this.body.velocity.x + this.walkSpeed) <= 300){
+            this.body.velocity.x += this.walkSpeed;
+        }
+        
+    }
+    else{
+      //  this.body.velocity.x += this.walkSpeed / 5;
+      //  if(this.body.velocity.x >= 300){
+      //      this.body.velocity.x = 300;
+      //  }
+      //  if(this.body.velocity.x <= -300){
+      //      this.body.velocity.x = -300;
+      //  }
+    }
     
-    this.body.velocity.x = this.walkSpeed;
+    if(this.rope.alive){
+        this.game.physics.arcade.collide(this.rope, this.gamestate.wallGroup, this.rope.onCollideWall, null, this.rope);
+    }
+    
+    this.game.debug.cameraInfo(this.game.camera, 32, 32);
+    this.game.debug.spriteCoords(this, 32, 500);
     
 }
 
