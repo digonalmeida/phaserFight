@@ -62,7 +62,8 @@ Zombie.prototype.update = function(){
     var player = this.gamestate.player;
     var distance = Math.sqrt(Math.pow((this.x - player.x),2) + Math.pow((this.y - player.y),2));
     
-    if(distance < 300){
+    if(distance < 300 && distance > 10){
+        console.log(distance);
             if(player.x > this.x){
                 this.walkSpeed = 200;
                 this.scale.x = 1;
@@ -80,7 +81,7 @@ Zombie.prototype.update = function(){
     }
     else{
         this.walkSpeed = 0;
-        this.flySpeed = 0;
+       // this.flySpeed = 0;
     }
 
     
@@ -88,8 +89,13 @@ Zombie.prototype.update = function(){
        // this.shot();
     }
     this.body.velocity.x = this.walkSpeed;
-    this.body.velocity.y = this.flySpeed;
-    if(player.y> this.y + 10 && this.canJump){
-      //  this.jump();   
+    //this.body.velocity.y = this.flySpeed;
+    if(player.y< this.y - 3 && this.canJump){
+        this.jump();   
     }
+}
+
+Zombie.prototype.jump = function(){
+    this.body.velocity.y = -200;   
+    this.canJump = false;
 }

@@ -62,7 +62,14 @@ Player.prototype.killRope = function(){
 }
 Player.prototype.throwRope = function(){
     if(!this.rope.alive){
-        this.rope.throw(this, {x:-1,y:-1});
+        var dir;
+        if(this.scale.x < 0){
+            dir = {x: -1, y: -1};
+        }
+        else{
+            dir = {x: 1, y: -1};
+        }
+        this.rope.throw(this, dir);
     }
 }
 Player.prototype.shot = function(){
@@ -113,7 +120,6 @@ Player.prototype.collideWithFloor = function(){
 Player.prototype.jump = function(){
     this.body.velocity.y = -200;   
     this.canJump = false;
-    
 }
 
 Player.prototype.shotCollideEnemy = function(shot, enemy){
@@ -124,9 +130,9 @@ Player.prototype.shotCollideEnemy = function(shot, enemy){
     }
 }
 Player.prototype.update = function(){
-    
+    var acceleration = 20;
     this.game.physics.arcade.collide(this.shots, this.gamestate.zombieGroup, this.shotCollideEnemy.bind(this));
-    
+    console.log(this.body.velocity.x);
     this.rotateGun();
     
     if(this.walkSpeed < 0){
@@ -142,10 +148,10 @@ Player.prototype.update = function(){
     }
     this.walkSpeed = 0;
     if(this.game.input.keyboard.isDown(Phaser.KeyCode.A)){
-           this.walkSpeed = -20;
+           this.walkSpeed = -300;
     }
     if(this.game.input.keyboard.isDown(Phaser.KeyCode.D)){
-           this.walkSpeed = 20;
+           this.walkSpeed = 300;
     }
     if(this.game.input.keyboard.isDown(Phaser.KeyCode.W) &&
       this.canJump){
@@ -156,9 +162,20 @@ Player.prototype.update = function(){
       //  this.throwRope();
     }
     if(!this.rope.alive || !this.rope.collided){
-        if(Math.abs(this.body.velocity.x + this.walkSpeed) <= 300){
-            this.body.velocity.x += this.walkSpeed;
+
+        if(this.walkSpeed > this.body.velocity.x && this.walkSpeed > -1){
+            if(this.body.velocity.x < 300){
+                this.body.velocity.x += acceleration;
+            }
         }
+        if(this.walkSpeed < this.body.velocity.x && this.walkSpeed < 1){
+            if(this.body.velocity.x > -300){
+                this.body.velocity.x -= acceleration;
+            }
+            
+        }
+        
+        
         
     }
     else{

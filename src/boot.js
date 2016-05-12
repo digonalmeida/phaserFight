@@ -20,6 +20,9 @@ BootState.prototype.createWalls = function(){
         this.createWall(Math.random() * 1900, 200 * i, 400, 40)
         this.createWall(Math.random() * 1900, 200 * i, 400, 40);
     }
+  //  var game =new Phaser.Game;
+//game.world.bounds.height
+    this.createWall(0, 2000, 3000, 30);
 }
 
 BootState.prototype.createZombies = function(){
@@ -54,7 +57,7 @@ BootState.prototype.create = function(){
     this.game.physics.arcade.gravity.y = 400;
     
     this.createWalls();
-    //this.createZombies();
+    this.createZombies();
     
     this.game.stage.backgroundColor = 0xeeeeff;
     this.player = new Player(this);
@@ -74,6 +77,7 @@ BootState.prototype.update = function(){
   //  this.game.camera.x = this.player.x;
 //    this.game.camera.y = this.player.y;
     this.game.physics.arcade.collide(this.playerGroup, this.wallGroup, this.playerFloorCollision);
+    this.game.physics.arcade.collide(this.zombieGroup, this.wallGroup, this.playerFloorCollision);
     this.game.physics.arcade.collide(this.zombieGroup, this.zombieGroup);
     this.game.physics.arcade.collide(this.zombieGroup, this.wallGroup, this.playerFloorCollision);
 }
