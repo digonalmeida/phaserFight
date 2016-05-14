@@ -63,7 +63,7 @@ Zombie.prototype.update = function(){
     var distance = Math.sqrt(Math.pow((this.x - player.x),2) + Math.pow((this.y - player.y),2));
     
     if(distance < 300 && distance > 10){
-        console.log(distance);
+        //console.log(distance);
             if(player.x > this.x){
                 this.walkSpeed = 200;
                 this.scale.x = 1;
@@ -90,7 +90,7 @@ Zombie.prototype.update = function(){
     }
     this.body.velocity.x = this.walkSpeed;
     //this.body.velocity.y = this.flySpeed;
-    if(player.y< this.y - 3 && this.canJump){
+    if(player.y< this.y - 30 && distance > 10 && this.canJump){
         this.jump();   
     }
 }

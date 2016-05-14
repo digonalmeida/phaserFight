@@ -12,6 +12,7 @@ BootState.prototype.preload = function(){
     this.game.load.image('gun', 'sprites/gun.png');
     this.game.load.image('shot', 'sprites/shot.png');
     this.game.load.image('floor', 'sprites/floor.png');
+    this.game.load.image('building', 'sprites/platform.png');
 }
 
 BootState.prototype.createWalls = function(){
@@ -35,7 +36,8 @@ BootState.prototype.createZombies = function(){
 }
 
 BootState.prototype.createWall = function(x, y, w, h){
-    
+    new Platform(this, x, y);
+    /*
     var floor = this.game.add.sprite(x, y, 'floor');
     floor.width = w;
     floor.height = h;
@@ -44,13 +46,13 @@ BootState.prototype.createWall = function(x, y, w, h){
     floor.body.immovable = true;
     floor.body.allowGravity = false;
     this.wallGroup.add(floor);
-    
+    */
 }
 
 BootState.prototype.create = function(){
      this.game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
-    this.playerGroup = this.game.add.group();
     this.wallGroup  = this.game.add.group();
+    this.playerGroup = this.game.add.group();
     this.zombieGroup = this.game.add.group();
    
     this.game.physics.startSystem(Phaser.Physics.ARCADE);

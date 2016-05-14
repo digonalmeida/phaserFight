@@ -52,7 +52,7 @@ Player.prototype.keyDown = function(event){
         this.throwRope();
     }
 }
-Player.prototype.keyUp = function(){
+Player.prototype.keyUp = function(event){
     if(event.keyCode == Phaser.KeyCode.SPACEBAR){
         this.killRope();
     }
@@ -132,7 +132,7 @@ Player.prototype.shotCollideEnemy = function(shot, enemy){
 Player.prototype.update = function(){
     var acceleration = 20;
     this.game.physics.arcade.collide(this.shots, this.gamestate.zombieGroup, this.shotCollideEnemy.bind(this));
-    console.log(this.body.velocity.x);
+    
     this.rotateGun();
     
     if(this.walkSpeed < 0){
