@@ -2,9 +2,9 @@ function Zombie(gamestate){
     this.gamestate = gamestate;
     this.game = this.gamestate.game;
     
-    Phaser.Sprite.call(this, this.game, 20, 100, "player");
-    this.tint = 0xff0000;
-    this.scale.setTo(1.2,1.2);
+    Phaser.Sprite.call(this, this.game, 20, 100, "zombie");
+    //this.tint = 0xff0000;
+    //this.scale.setTo(1.2,1.2);
     this.anchor.setTo(0.5,0.5);
     
     this.game.add.existing(this);
@@ -90,6 +90,7 @@ Zombie.prototype.update = function(){
     }
     this.body.velocity.x = this.walkSpeed;
     //this.body.velocity.y = this.flySpeed;
+
     if(player.y< this.y - 30 && distance > 10 && this.canJump){
         this.jump();   
     }

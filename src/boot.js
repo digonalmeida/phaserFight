@@ -12,7 +12,11 @@ BootState.prototype.preload = function(){
     this.game.load.image('gun', 'sprites/gun.png');
     this.game.load.image('shot', 'sprites/shot.png');
     this.game.load.image('floor', 'sprites/floor.png');
+
     this.game.load.image('building', 'sprites/platform.png');
+
+    this.game.load.image('zombie', 'sprites/zombie.png');
+
 }
 
 BootState.prototype.createWalls = function(){
@@ -33,10 +37,14 @@ BootState.prototype.createZombies = function(){
         zombie.y = Math.random() * 1900;
         this.zombieGroup.add(zombie);
     }
+    this.game.world.bringToTop(this.zombieGroup);
 }
 
 BootState.prototype.createWall = function(x, y, w, h){
     new Platform(this, x, y);
+    new SpawnPoint(this, x, y-20);
+    this.game.world.bringToTop(this.wallGroup);
+    
     /*
     var floor = this.game.add.sprite(x, y, 'floor');
     floor.width = w;
@@ -50,6 +58,7 @@ BootState.prototype.createWall = function(x, y, w, h){
 }
 
 BootState.prototype.create = function(){
+    this.game.world.setBounds(0,0,2048, 2048);
      this.game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
     this.wallGroup  = this.game.add.group();
     this.playerGroup = this.game.add.group();
@@ -61,11 +70,14 @@ BootState.prototype.create = function(){
     this.createWalls();
     this.createZombies();
     
+    
     this.game.stage.backgroundColor = 0xeeeeff;
+    this.game.world.bringToTop(this.playerGroup);
     this.player = new Player(this);
     this.playerGroup.add(this.player);
+    this.game.world.bringToTop(this.playerGroup);
     //this.game = Phaser.Game();
-    this.game.world.setBounds(0,0,2048, 2048);
+    
     this.game.camera.follow(this.player);
 }
 

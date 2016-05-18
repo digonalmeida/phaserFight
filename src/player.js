@@ -9,7 +9,7 @@ function Player(gamestate){
     this.anchor.setTo(0.5,0.5);
     
     this.gun.anchor.setTo(0.5, 0.5);
-    this.gun.x = 50;
+    this.gun.x = 25;
     this.gun.y = 0;
     
     this.game.add.existing(this);
@@ -109,8 +109,8 @@ Player.prototype.rotateGun = function(){
     
     this.gun.rotation = angle;
     
-    this.gun.x = this.x + (this.direction.x * 50);
-    this.gun.y = this.y + (this.direction.y * 50);
+    this.gun.x = this.x + (this.direction.x * 25);
+    this.gun.y = this.y + (this.direction.y * 25);
 }
 
 Player.prototype.collideWithFloor = function(){
@@ -129,10 +129,16 @@ Player.prototype.shotCollideEnemy = function(shot, enemy){
         enemy.kill();
     }
 }
+Player.prototype.findClosest = function(){
+    for(var i = 0; i < this.gamestate.zombieGroup.children.length; i++){
+        console.log("%o",this.gamestate.zombieGroup.children[i]);   
+    }
+}
 Player.prototype.update = function(){
+    this.findClosest();
     var acceleration = 20;
     this.game.physics.arcade.collide(this.shots, this.gamestate.zombieGroup, this.shotCollideEnemy.bind(this));
-    
+
     this.rotateGun();
     
     if(this.walkSpeed < 0){
