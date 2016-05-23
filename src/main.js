@@ -14,7 +14,7 @@ window.onload = function(){
      //     gyroInfo.beta = o.beta;
     //  });
     
-    var game = new Phaser.Game(600, 400, Phaser.AUTO, 'Phaser Fighter');
+    var game = new Phaser.Game(640, 360, Phaser.AUTO, 'Phaser Fighter');
     game.state.add('boot', new BootState(game));
     game.state.start('boot');
 }

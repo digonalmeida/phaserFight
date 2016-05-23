@@ -59,14 +59,13 @@ BootState.prototype.createWall = function(x, y, w, h){
 function goFullScreen(game){
     game.scale.pageAlignHorizontally = true;
     game.scale.pageAlignVertically = true;
-    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    game.scale.scaleMode = Phaser.ScaleManager.NO_SCALE;
     game.scale.startFullScreen(false, true);
    // game.scale.setScreenSize(true);
 }
 BootState.prototype.create = function(){
-    if(!Phaser.Device.desktop){
-        goFullScreen(this.game);
-    }
+    
+    goFullScreen(this.game);
     this.game.world.setBounds(0,0,2048, 2048);
      this.game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
     this.wallGroup  = this.game.add.group();
@@ -80,7 +79,7 @@ BootState.prototype.create = function(){
     this.createZombies();
     
     
-    this.game.stage.backgroundColor = 0xeeeeff;
+    this.game.stage.backgroundColor = 0x555566;
     this.game.world.bringToTop(this.playerGroup);
     this.player = new Player(this);
     this.playerGroup.add(this.player);
@@ -88,7 +87,12 @@ BootState.prototype.create = function(){
     //this.game = Phaser.Game();
     
     this.game.camera.follow(this.player);
-    this.game.input.activePointer.onmouse
+    var fsbutton = this.game.add.text(0,0,"FullScreen");
+    fsbutton.inputEnabled = true;
+    fsbutton.events.onInputUp.add(function(){goFullScreen(this.game);}, this);
+    fsbutton.fixedToCamera = true;
+
+//    this.game.camera.addChild(fsbutton);
 }
 
 BootState.prototype.playerFloorCollision = function(player, wall){
