@@ -31,11 +31,11 @@ BootState.prototype.createWalls = function(){
 }
 
 BootState.prototype.createZombies = function(){
-    for(var i = 0; i < 5; i ++){
+    for(var i = 0; i < 30; i ++){
         var zombie = new Zombie(this);
         zombie.x = Math.random() * 1900;
         zombie.y = Math.random() * 1900;
-        this.zombieGroup.add(zombie);
+        zombie.kill();
     }
     this.game.world.bringToTop(this.zombieGroup);
 }
