@@ -56,8 +56,17 @@ BootState.prototype.createWall = function(x, y, w, h){
     this.wallGroup.add(floor);
     */
 }
-
+function goFullScreen(game){
+    game.scale.pageAlignHorizontally = true;
+    game.scale.pageAlignVertically = true;
+    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    game.scale.startFullScreen(false, true);
+   // game.scale.setScreenSize(true);
+}
 BootState.prototype.create = function(){
+    if(!Phaser.Device.desktop){
+        goFullScreen(this.game);
+    }
     this.game.world.setBounds(0,0,2048, 2048);
      this.game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
     this.wallGroup  = this.game.add.group();
@@ -79,6 +88,7 @@ BootState.prototype.create = function(){
     //this.game = Phaser.Game();
     
     this.game.camera.follow(this.player);
+    this.game.input.activePointer.onmouse
 }
 
 BootState.prototype.playerFloorCollision = function(player, wall){

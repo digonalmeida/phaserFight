@@ -1,5 +1,21 @@
+var gyroInfo =   {
+    gamma: 0,
+    alpha: 0,
+    beta: 0
+}
 window.onload = function(){
-    var game = new Phaser.Game(400, 300, Phaser.AUTO, 'Phaser Fighter');
+    
+    // setting gyroscope update frequency
+    //  gyro.frequency = 10;
+    // start gyroscope detection
+     // gyro.startTracking(function(o) {
+    //      gyroInfo.gamma = o.gamma;
+     //     gyroInfo.alpha = o.alpha;
+     //     gyroInfo.beta = o.beta;
+    //  });
+    
+    var game = new Phaser.Game(600, 400, Phaser.AUTO, 'Phaser Fighter');
     game.state.add('boot', new BootState(game));
     game.state.start('boot');
 }
+

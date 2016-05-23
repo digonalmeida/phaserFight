@@ -1,38 +1,32 @@
 function Player(gamestate){
+    
+     this.beta = 0;
+    
+    
     this.gamestate = gamestate;
     this.game = this.gamestate.game;
     
     Phaser.Sprite.call(this, this.game, 100, 100, "player");
 
-    this.gun = this.game.add.sprite(0,0, "gun");
+    this.gun = new Gun(this);
     //this.addChild(this.gun);
     this.anchor.setTo(0.5,0.5);
-    
-    this.gun.anchor.setTo(0.5, 0.5);
-    this.gun.x = 25;
-    this.gun.y = 0;
     
     this.game.add.existing(this);
     
     this.direction;
+    this.aimDirection;
+    this.target;
     this.angle = 0;
     
     this.inputEnabled = true;
-    this.canShoot = true;
+    
     
     this.shotInterval = 0.1;
     
     this.game.physics.arcade.enable(this);
     this.body.allowGravity = true;
     
-    this.shots = this.game.add.group();
-    
-    for(var i = 0; i < 20; i++){
-        var shot = this.game.add.sprite(0,0,'shot');
-        
-        shot.kill();
-        this.shots.add(shot, true);
-    }
     
     this.game.input.keyboard.onDownCallback = this.throwRope.bind(this);
     this.game.input.keyboard.onUpCallback = this.keyUp.bind(this);
@@ -42,6 +36,9 @@ function Player(gamestate){
     this.walkSpeed = 0;
     this.canJump = true;
     this.body.collideWorldBounds = true;
+    
+   	this.targetDistance = 4000;
+    
 }
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);
@@ -72,45 +69,15 @@ Player.prototype.throwRope = function(){
         this.rope.throw(this, dir);
     }
 }
-Player.prototype.shot = function(){
-    this.canShoot = false;
-    
-    var shot = this.shots.getFirstDead(false);
-    this.game.physics.enable(shot);
-    shot.outOfBoundsKill = true;
-    shot.revive();
-    shot.x = this.gun.x;
-    shot.y = this.gun.y;
-    //
-    shot.body.velocity.setTo(this.direction.x*1000, this.direction.y*1000);
-    
-    shot.rotation = this.gun.rotation;
-    
-    this.game.time.events.add(Phaser.Timer.SECOND * this.shotInterval, function(){this.canShoot = true}.bind(this), this);
-    this.game.time.events.add(Phaser.Timer.SECOND * 2, shot.kill, shot);
-    
-    shot.tint = 0xffff00; 
-}
 
-Player.prototype.rotateGun = function(){
-    var mx = this.game.input.activePointer.worldX - this.x;
-    var my = this.game.input.activePointer.worldY - this.y;
-    var mmod = Math.sqrt(Math.pow(mx,2) + Math.pow(my,2));
-    //console.log(mx + ", " + my);
-    this.direction = {
-        x: mx / mmod,
-        y: my / mmod
-    };
-    
-    var angle = Math.acos(this.direction.x);
-    if(this.direction.y < 0){
-     angle = -angle;   
+
+Player.prototype.updateAim = function(){
+    if(this.target == null){
+        this.aimDirection = {x: 1, y :0};   
     }
-    
-    this.gun.rotation = angle;
-    
-    this.gun.x = this.x + (this.direction.x * 25);
-    this.gun.y = this.y + (this.direction.y * 25);
+    else{
+        this.aimDirection = Vec.normalized(Vec.sub(this.target, this));   
+    }
 }
 
 Player.prototype.collideWithFloor = function(){
@@ -122,24 +89,45 @@ Player.prototype.jump = function(){
     this.canJump = false;
 }
 
-Player.prototype.shotCollideEnemy = function(shot, enemy){
-    shot.kill();
-    enemy.life--;
-    if(enemy.life <= 0){
-        enemy.kill();
+Player.prototype.updateTarget = function(){
+    var closestDistance = 4000;
+    var closest = null;
+    var zombies = this.gamestate.zombieGroup.children;
+    for(var i = 0; i < zombies.length; i++){
+        
+        var zombie = zombies[i];
+        
+        if(zombie.alive){
+            var distance = Vec.distance(this, zombie);
+            var found = false;
+
+            if(closest == null){
+                found = true;
+            }
+
+            else if(distance < closestDistance){
+                found = true;
+            }
+
+            if(found){
+                closest = zombie;
+                closestDistance = distance;
+            }
+        }
+        
     }
-}
-Player.prototype.findClosest = function(){
-    for(var i = 0; i < this.gamestate.zombieGroup.children.length; i++){
-        console.log("%o",this.gamestate.zombieGroup.children[i]);   
-    }
+    
+   
+    this.target = closest;
+   // this.game.debug.spriteInfo(this.target,0,100);
+    this.targetDistance = closestDistance;
 }
 Player.prototype.update = function(){
-    this.findClosest();
+    //this.game.debug.text(gyroInfo.beta, 0, 200);
+    this.updateTarget();
+    this.updateAim();
+    
     var acceleration = 20;
-    this.game.physics.arcade.collide(this.shots, this.gamestate.zombieGroup, this.shotCollideEnemy.bind(this));
-
-    this.rotateGun();
     
     if(this.walkSpeed < 0){
         this.scale.x = -1;
@@ -149,24 +137,69 @@ Player.prototype.update = function(){
         this.scale.x = 1;
         this.gun.scale.y = 1;
     }
-    if(this.game.input.activePointer.isDown && this.canShoot){
-        this.shot();   
-    }
-    this.walkSpeed = 0;
-    if(this.game.input.keyboard.isDown(Phaser.KeyCode.A)){
-           this.walkSpeed = -300;
-    }
-    if(this.game.input.keyboard.isDown(Phaser.KeyCode.D)){
-           this.walkSpeed = 300;
-    }
-    if(this.game.input.keyboard.isDown(Phaser.KeyCode.W) &&
-      this.canJump){
+    
+    var right = false;
+    var left = false;
+    
+    if(Phaser.Device.desktop){
+
+        left = this.game.input.keyboard.isDown(Phaser.KeyCode.A);
         
-           this.jump();
+        right = this.game.input.keyboard.isDown(Phaser.KeyCode.D);
+        
+
+        if(this.game.input.keyboard.isDown(Phaser.KeyCode.W) &&
+          this.canJump){
+
+               this.jump();
+        }
+
     }
-    if(this.game.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)){
-      //  this.throwRope();
+    else{
+        var pointers = [this.game.input.pointer1,
+                       this.game.input.pointer2,
+                       this.game.input.activePointer];
+        for(var i = 0; i < pointers.length; i++){
+            
+            
+            var pointer = pointers[i];//@pointer = new
+            if(pointer.isDown){
+                console.log("here");
+                if(pointer.x > this.game.width/2){
+                    right = true;   
+                }
+                else{
+                    left = true;   
+                }
+            }
+            
+            
+        }
+        /*
+         if(gyroInfo.beta < 0){
+            right = true;  
+         }
+        else{
+            left = true;
+        }*/
     }
+    if(left && right){
+        this.throwRope();   
+    }
+    else{
+        this.killRope();
+        if(!left && !right){
+            this.walkSpeed = 0;   
+        }
+        else if(left){
+            this.walkSpeed = - 300;   
+        }
+        else if(right){
+            this.walkSpeed = 300;
+        }
+    }   
+   
+    
     if(!this.rope.alive || !this.rope.collided){
 
         if(this.walkSpeed > this.body.velocity.x && this.walkSpeed > -1){
@@ -181,23 +214,19 @@ Player.prototype.update = function(){
             
         }
         
-        
-        
     }
-    else{
-      //  this.body.velocity.x += this.walkSpeed / 5;
-      //  if(this.body.velocity.x >= 300){
-      //      this.body.velocity.x = 300;
-      //  }
-      //  if(this.body.velocity.x <= -300){
-      //      this.body.velocity.x = -300;
-      //  }
-    }
+
     
     if(this.rope.alive){
         this.game.physics.arcade.collide(this.rope, this.gamestate.wallGroup, this.rope.onCollideWall, null, this.rope);
     }
     
+    //if(this.game.input.activePointer.isDown){
+    //    this.throwRope();   
+    //}
+    //else{
+    //    this.killRope();   
+    //}
     //this.game.debug.cameraInfo(this.game.camera, 32, 32);
    // this.game.debug.spriteCoords(this, 32, 500);
     

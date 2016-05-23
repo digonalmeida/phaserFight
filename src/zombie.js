@@ -8,7 +8,7 @@ function Zombie(gamestate){
     this.anchor.setTo(0.5,0.5);
     
     this.game.add.existing(this);
-    
+    this.gamestate.zombieGroup.add(this);
     this.direction = {x:0, y:1};
 
     this.canShoot = true;
@@ -25,7 +25,7 @@ function Zombie(gamestate){
         this.shots.add(shot, true);
     }
 
-    this.life = 3;
+    this.life = 2;
     this.walkSpeed = 0;
     this.canJump = true;
     this.body.collideWorldBounds = true;
