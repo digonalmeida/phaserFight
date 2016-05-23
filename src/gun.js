@@ -12,7 +12,7 @@ function Gun(player){
     
     this.shots = this.game.add.group();
     
-    for(var i = 0; i < 20; i++){
+    for(var i = 0; i < 50; i++){
         var shot = this.game.add.sprite(0,0,'shot');
         
         shot.kill();
