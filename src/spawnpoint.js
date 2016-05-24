@@ -11,15 +11,15 @@ SpawnPoint.prototype.spawn = function(){
     
     if(Math.sqrt( Math.pow(this.x - player.x,2) + Math.pow(this.y - player.y, 2)) > 300){
         
-        var zombie = this.gamestate.zombieGroup.getFirstDead(false);
-        if(zombie == null){
-            zombie = new Zombie(this.gamestate);   
-        }
+        var zombie = this.gamestate.zombieGroup.getFirstDead();
+        //if(zombie == null){
+        //    zombie = new Zombie(this.gamestate);   
+        //}
         if(zombie != null){
             zombie.revive();
             zombie.x =  this.x + (Math.random() * 200);
             zombie.y = this.y;
-            zombie.life = 2;
+            zombie.life = 1;
         }
     }
     

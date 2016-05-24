@@ -127,7 +127,7 @@ Player.prototype.update = function(){
     this.updateTarget();
     this.updateAim();
     
-    var acceleration = 20;
+    var acceleration = 500;
     
     if(this.walkSpeed < 0){
         this.scale.x = -1;
@@ -204,12 +204,12 @@ Player.prototype.update = function(){
 
         if(this.walkSpeed > this.body.velocity.x && this.walkSpeed > -1){
             if(this.body.velocity.x < 300){
-                this.body.velocity.x += acceleration;
+                this.body.velocity.x += acceleration* (this.game.time.elapsed/1000);
             }
         }
         if(this.walkSpeed < this.body.velocity.x && this.walkSpeed < 1){
             if(this.body.velocity.x > -300){
-                this.body.velocity.x -= acceleration;
+                this.body.velocity.x -= acceleration* (this.game.time.elapsed/1000);
             }
             
         }
@@ -220,6 +220,7 @@ Player.prototype.update = function(){
     if(this.rope.alive){
         this.game.physics.arcade.collide(this.rope, this.gamestate.wallGroup, this.rope.onCollideWall, null, this.rope);
     }
+    this.game.physics.arcade.collide(this, this.gamestate.zombieGroup, this.rope.onCollideWall, null, this.rope);
     
     //if(this.game.input.activePointer.isDown){
     //    this.throwRope();   

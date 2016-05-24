@@ -22,8 +22,8 @@ BootState.prototype.preload = function(){
 BootState.prototype.createWalls = function(){
     
     for(var i = 0; i < 10; i ++){
-        this.createWall(Math.random() * 1900, 200 * i, 400, 40)
-        this.createWall(Math.random() * 1900, 200 * i, 400, 40);
+        this.createWall(Math.random() * 800, 50 * i, 100, 10)
+        this.createWall(Math.random() * 800, 50 * i, 100, 10);
     }
   //  var game =new Phaser.Game;
 //game.world.bounds.height
@@ -31,7 +31,7 @@ BootState.prototype.createWalls = function(){
 }
 
 BootState.prototype.createZombies = function(){
-    for(var i = 0; i < 30; i ++){
+    for(var i = 0; i < 10; i ++){
         var zombie = new Zombie(this);
         zombie.x = Math.random() * 1900;
         zombie.y = Math.random() * 1900;
@@ -42,7 +42,7 @@ BootState.prototype.createZombies = function(){
 
 BootState.prototype.createWall = function(x, y, w, h){
     new Platform(this, x, y);
-    new SpawnPoint(this, x, y-20);
+    new SpawnPoint(this, x, y-5);
     this.game.world.bringToTop(this.wallGroup);
     
     /*
@@ -64,16 +64,16 @@ function goFullScreen(game){
    // game.scale.setScreenSize(true);
 }
 BootState.prototype.create = function(){
-    
+
     goFullScreen(this.game);
-    this.game.world.setBounds(0,0,2048, 2048);
+    this.game.world.setBounds(0,0,800, 600);
      this.game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
     this.wallGroup  = this.game.add.group();
     this.playerGroup = this.game.add.group();
     this.zombieGroup = this.game.add.group();
    
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
-    this.game.physics.arcade.gravity.y = 400;
+    this.game.physics.arcade.gravity.y = 500;
     
     this.createWalls();
     this.createZombies();
@@ -91,6 +91,8 @@ BootState.prototype.create = function(){
     fsbutton.inputEnabled = true;
     fsbutton.events.onInputUp.add(function(){goFullScreen(this.game);}, this);
     fsbutton.fixedToCamera = true;
+    
+    
 
 //    this.game.camera.addChild(fsbutton);
 }
@@ -108,4 +110,6 @@ BootState.prototype.update = function(){
     this.game.physics.arcade.collide(this.zombieGroup, this.wallGroup, this.playerFloorCollision);
     this.game.physics.arcade.collide(this.zombieGroup, this.zombieGroup);
     this.game.physics.arcade.collide(this.zombieGroup, this.wallGroup, this.playerFloorCollision);
+    
+    this.game.debug.text('Living: ' + this.zombieGroup.countLiving() + '   Dead: ' + this.zombieGroup.countDead(), 32, 64);
 }
