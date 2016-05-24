@@ -25,7 +25,7 @@ function Zombie(gamestate){
         this.shots.add(shot, true);
     }
 
-    this.life = 2;
+    this.life = 1;
     this.walkSpeed = 0;
     this.canJump = true;
     this.body.collideWorldBounds = true;

@@ -3,8 +3,8 @@ function Rope(game){
     
     Phaser.Sprite.call(this, game, 0,0, "floor a");
     this.game.add.existing(this);
-    this.width = 10;
-    this.height = 10;
+    this.width = 3;
+    this.height = 3;
     this.origin = null;
     this.anchor.setTo(0.5,0.5);
     
@@ -33,9 +33,8 @@ Rope.prototype.throw = function(origin, direction){
     this.x = origin.x;
     this.y = origin.y;
     
-    this.body.velocity.x = direction.x * 1600;
-    this.body.velocity.y = direction.y * 1600;
-    
+    this.body.velocity.x = direction.x * 800;
+    this.body.velocity.y = direction.y * 800;
 }
 Rope.prototype.onCollideWall = function(me, other){
 
@@ -61,7 +60,7 @@ Rope.prototype.update = function(){
     }
     
     this.graphics.beginFill(0xff3300);
-    this.graphics.lineStyle(10, 0xffd900, 1);
+    this.graphics.lineStyle(2, 0xffd900, 1);
     
     
     if(this.origin == null){
@@ -75,8 +74,8 @@ Rope.prototype.update = function(){
                 y: this.y - this.origin.y};
         var mod = Math.sqrt(Math.pow(d.x,2) + Math.pow(d.y,2));
         var d = {x: d.x/mod, y: d.y/mod};
-        this.origin.body.velocity.x += d.x * 30;
-        this.origin.body.velocity.y += d.y * 30;
+        this.origin.body.velocity.x += (d.x * 1000)*(this.game.time.elapsed/1000);
+        this.origin.body.velocity.y += (d.y * 1000)*(this.game.time.elapsed/ 1000);
     }
     
 }

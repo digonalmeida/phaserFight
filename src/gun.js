@@ -14,9 +14,10 @@ function Gun(player){
     
     for(var i = 0; i < 50; i++){
         var shot = this.game.add.sprite(0,0,'shot');
-        
+        this.game.physics.enable(shot);
         shot.kill();
         this.shots.add(shot, true);
+        shot.body.allowGravity = false;
     }
     this.shotInterval = 0.1;
     this.canShoot = true;
@@ -31,18 +32,18 @@ Gun.prototype.shot = function(){
     this.canShoot = false;
     
     var shot = this.shots.getFirstDead(false);
-    this.game.physics.enable(shot);
+    
     shot.outOfBoundsKill = true;
     shot.revive();
     shot.x = this.x;
     shot.y = this.y;
     //
-    shot.body.velocity.setTo(this.direction.x*1000, this.direction.y*1000);
+    shot.body.velocity.setTo(this.direction.x*250, this.direction.y*250);
     
     shot.rotation = this.rotation;
     
     this.game.time.events.add(Phaser.Timer.SECOND * this.shotInterval, function(){this.canShoot = true}.bind(this), this);
-    this.game.time.events.add(Phaser.Timer.SECOND * 2, shot.kill, shot);
+    this.game.time.events.add(Phaser.Timer.SECOND * 4, shot.kill, shot);
     
     shot.tint = 0xffff00; 
     
@@ -67,14 +68,14 @@ Gun.prototype.update = function(){
     
     this.rotation = angle;
     
-    this.x = this.player.x + (this.direction.x * 25);
-    this.y = this.player.y + (this.direction.y * 25);
+    this.x = this.player.x + (this.direction.x * 5);
+    this.y = this.player.y + (this.direction.y * 5);
     
     var target = this.player.target;
     if(target != null){
         if(this.canShoot){
             //console.log(this.player.targetDistance);
-            if(this.player.targetDistance < 200){
+            if(this.player.targetDistance < 50){
                 this.shot();   
             }
         }
