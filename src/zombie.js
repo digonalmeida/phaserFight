@@ -4,7 +4,7 @@ function Zombie(gamestate){
     
     Phaser.Sprite.call(this, this.game, 20, 100, "zombie");
     //this.tint = 0xff0000;
-    //this.scale.setTo(1.2,1.2);
+    this.scale.setTo(1.2,2 );
     this.anchor.setTo(0.5,0.5);
     
     this.game.add.existing(this);
@@ -62,21 +62,21 @@ Zombie.prototype.update = function(){
     var player = this.gamestate.player;
     var distance = Math.sqrt(Math.pow((this.x - player.x),2) + Math.pow((this.y - player.y),2));
     
-    if(distance < 300 && distance > 10){
+    if(distance < 150 && distance > 3){
         //console.log(distance);
             if(player.x > this.x){
-                this.walkSpeed = 200;
+                this.walkSpeed = 100;
                 this.scale.x = 1;
             }
             else if(player.x < this.x){
-                this.walkSpeed = -200;
+                this.walkSpeed = -100;
                 this.scale.x = -1;
             }
             if(player.y > this.y){
-                this.flySpeed = 200;
+                this.flySpeed = 100;
             }
             else if(player.y < this.y){
-                this.flySpeed = -200;
+                this.flySpeed = -100;
             }
     }
     else{
@@ -91,7 +91,7 @@ Zombie.prototype.update = function(){
     this.body.velocity.x = this.walkSpeed;
     //this.body.velocity.y = this.flySpeed;
 
-    if(player.y< this.y - 30 && distance > 10 && this.canJump){
+    if(player.y< this.y && distance > 10 && distance < 100 && this.canJump){
         this.jump();   
     }
 }
