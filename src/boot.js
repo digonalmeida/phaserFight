@@ -21,17 +21,17 @@ BootState.prototype.preload = function(){
 
 BootState.prototype.createWalls = function(){
     
-    for(var i = 0; i < 10; i ++){
+    for(var i = 0; i < 11; i ++){
         this.createWall(Math.random() * 800, 50 * i, 100, 10)
+        this.createWall(Math.random() * 800, 50 * i, 100, 10);
         this.createWall(Math.random() * 800, 50 * i, 100, 10);
     }
   //  var game =new Phaser.Game;
 //game.world.bounds.height
-    this.createWall(0, 2000, 3000, 30);
 }
 
 BootState.prototype.createZombies = function(){
-    for(var i = 0; i < 10; i ++){
+    for(var i = 0; i < 60; i ++){
         var zombie = new Zombie(this);
         zombie.x = Math.random() * 1900;
         zombie.y = Math.random() * 1900;
@@ -101,12 +101,17 @@ BootState.prototype.playerFloorCollision = function(player, wall){
     player.collideWithFloor();
 }
 
+BootState.prototype.playerZombieCollision = function(player, wall){
+    player.collideWithZombie();
+}
+
 
 BootState.prototype.update = function(){
     
   //  this.game.camera.x = this.player.x;
 //    this.game.camera.y = this.player.y;
     this.game.physics.arcade.collide(this.playerGroup, this.wallGroup, this.playerFloorCollision);
+    this.game.physics.arcade.collide(this.playerGroup, this.zombieGroup, this.playerZombieCollision);
     this.game.physics.arcade.collide(this.zombieGroup, this.wallGroup, this.playerFloorCollision);
     this.game.physics.arcade.collide(this.zombieGroup, this.zombieGroup);
     this.game.physics.arcade.collide(this.zombieGroup, this.wallGroup, this.playerFloorCollision);

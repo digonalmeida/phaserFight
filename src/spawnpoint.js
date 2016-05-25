@@ -3,7 +3,7 @@ function SpawnPoint(gamestate, x, y){
     this.game = this.gamestate.game;
     this.x = x;
     this.y = y;
-    this.game.time.events.add(Phaser.Timer.SECOND * 4, this.spawn, this);
+    this.game.time.events.add(Phaser.Timer.SECOND * 1, this.spawn, this);
 }
 
 SpawnPoint.prototype.spawn = function(){
@@ -17,7 +17,7 @@ SpawnPoint.prototype.spawn = function(){
         //}
         if(zombie != null){
             zombie.revive();
-            zombie.x =  this.x + (Math.random() * 200);
+            zombie.x =  this.x + (Math.random() * 50);
             zombie.y = this.y;
             zombie.life = 1;
         }

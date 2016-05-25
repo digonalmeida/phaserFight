@@ -39,6 +39,21 @@ function Player(gamestate){
     
    	this.targetDistance = 4000;
     
+    this.points = 0;
+    this.gui = this.game.add.group();
+    
+    this.pointsGui = this.game.add.text(200,0,"Points:" + this.points, {fill:'yellow'});
+
+    this.ammoGui = this.game.add.text(350,0,"Ammo:" + this.gun.ammo, {fill:'yellow'});
+    this.gui.add(this.pointsGui);
+    this.gui.add(this.ammoGui);
+    this.gui.fixedToCamera = true;
+    this.ammoBox = this.game.add.sprite(10,10,"player");
+    
+    this.game.physics.enable(this.ammoBox);
+    
+    this.ammoBox.body.collideWorldBounds = true;
+    
 }
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);
@@ -61,10 +76,10 @@ Player.prototype.throwRope = function(){
     if(!this.rope.alive){
         var dir;
         if(this.scale.x < 0){
-            dir = {x: -1, y: -1};
+            dir = {x: -0.5, y: -1};
         }
         else{
-            dir = {x: 1, y: -1};
+            dir = {x: 0.5, y: -1};
         }
         this.rope.throw(this, dir);
     }
@@ -80,8 +95,20 @@ Player.prototype.updateAim = function(){
     }
 }
 
+
+
 Player.prototype.collideWithFloor = function(){
     this.canJump = true;   
+}
+Player.prototype.collideWithZombie = function(){
+    alert("game over. " + this.points + " points");
+    this.game.state.start('boot');
+}
+
+Player.prototype.collideWithAmmo = function(){
+    this.gun.ammo += 20;
+    this.ammoBox.x = Math.random() * 500;
+    this.ammoBox.y = Math.random() * 500;
 }
 
 Player.prototype.jump = function(){
@@ -123,7 +150,10 @@ Player.prototype.updateTarget = function(){
     this.targetDistance = closestDistance;
 }
 Player.prototype.update = function(){
-    //this.game.debug.text(gyroInfo.beta, 0, 200);
+    //this.gui.bringToTop();
+    this.pointsGui.text = "Points: " + this.points;
+    this.ammoGui.text = "Ammo: " +this.gun.ammo;
+    this.game.debug.text(gyroInfo.beta, 0, 200);
     this.updateTarget();
     this.updateAim();
     
@@ -220,7 +250,8 @@ Player.prototype.update = function(){
     if(this.rope.alive){
         this.game.physics.arcade.collide(this.rope, this.gamestate.wallGroup, this.rope.onCollideWall, null, this.rope);
     }
-    this.game.physics.arcade.collide(this, this.gamestate.zombieGroup, this.rope.onCollideWall, null, this.rope);
+    this.game.physics.arcade.overlap(this, this.ammoBox, this.collideWithAmmo, null, this);
+    this.game.physics.arcade.collide(this.ammoBox, this.gamestate.wallGroup);
     
     //if(this.game.input.activePointer.isDown){
     //    this.throwRope();   
