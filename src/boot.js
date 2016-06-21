@@ -3,6 +3,8 @@ function BootState(game){
     this.game = game;
     this.playerGroup = null;
     this.wallGroup = null;
+    this.wallCollsionGroup = null;
+    this.shotsCollisionGroup = null;
     this.player = null;
     this.zombieGroup = null;
 }
@@ -67,13 +69,23 @@ BootState.prototype.create = function(){
 
     goFullScreen(this.game);
     this.game.world.setBounds(0,0,800, 600);
+    
+    this.game.physics.startSystem(Phaser.Physics.P2JS);
+    this.game.physics.p2.gravity.y = 500;
+    this.game.physics.p2.setImpactEvents(true);
+    
      this.game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
     this.wallGroup  = this.game.add.group();
+    
+    this.wallCollsionGroup = this.game.physics.p2.createCollisionGroup();
+    this.shotsCollisionGroup = this.game.physics.p2.createCollisionGroup();
+    this.playerCollisionGroup = this.game.physics.p2.createCollisionGroup();
+    this.ammoCollisionGroup = this.game.physics.p2.createCollisionGroup();
+    this.ropeCollisionGroup = this.game.physics.p2.createCollisionGroup();
+    
+    this.game.physics.p2.updateBoundsCollisionGroup();
     this.playerGroup = this.game.add.group();
     this.zombieGroup = this.game.add.group();
-   
-    this.game.physics.startSystem(Phaser.Physics.ARCADE);
-    this.game.physics.arcade.gravity.y = 500;
     
     this.createWalls();
     this.createZombies();
@@ -81,20 +93,20 @@ BootState.prototype.create = function(){
     
     this.game.stage.backgroundColor = 0x555566;
     this.game.world.bringToTop(this.playerGroup);
-    this.player = new Player(this);
-    this.playerGroup.add(this.player);
-    this.game.world.bringToTop(this.playerGroup);
-    //this.game = Phaser.Game();
     
+   // this.playerGroup.add(this.player);
+    //this.game.world.bringToTop(this.playerGroup);
+    //this.game = Phaser.Game();
+    this.player = new Player(this);
     this.game.camera.follow(this.player);
+   // this.player.body.collides([this.wallCollsionGroup],function(){alert('teste');});
     var fsbutton = this.game.add.text(0,0,"FullScreen");
     fsbutton.inputEnabled = true;
     fsbutton.events.onInputUp.add(function(){goFullScreen(this.game);}, this);
     fsbutton.fixedToCamera = true;
     
-    
+    this.game.physics.p2.updateBoundsCollisionGroup();
 
-//    this.game.camera.addChild(fsbutton);
 }
 
 BootState.prototype.playerFloorCollision = function(player, wall){
@@ -110,11 +122,12 @@ BootState.prototype.update = function(){
     
   //  this.game.camera.x = this.player.x;
 //    this.game.camera.y = this.player.y;
+    /*
     this.game.physics.arcade.collide(this.playerGroup, this.wallGroup, this.playerFloorCollision);
     this.game.physics.arcade.collide(this.playerGroup, this.zombieGroup, this.playerZombieCollision);
     this.game.physics.arcade.collide(this.zombieGroup, this.wallGroup, this.playerFloorCollision);
     this.game.physics.arcade.collide(this.zombieGroup, this.zombieGroup);
     this.game.physics.arcade.collide(this.zombieGroup, this.wallGroup, this.playerFloorCollision);
-    
+    */
     this.game.debug.text('Living: ' + this.zombieGroup.countLiving() + '   Dead: ' + this.zombieGroup.countDead(), 32, 64);
 }
