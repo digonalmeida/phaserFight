@@ -108,5 +108,5 @@ Gun.prototype.shotCollideEnemy = function(shot, enemy){
     if(enemy.sprite.life <= 0){
         enemy.sprite.kill();
     }
-    this.gamestate.points++;
+    this.gamestate.score++;
 }

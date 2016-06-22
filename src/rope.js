@@ -24,7 +24,6 @@ function Rope(gamestate){
     this.pullImpulseForce = 100; // * deltaTime
     this.maxPullVelocity = 600;
     this.kill();
-    
 }
 
 

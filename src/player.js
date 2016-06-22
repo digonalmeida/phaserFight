@@ -85,7 +85,7 @@ Player.prototype.updateAim = function(){
 }
 
 Player.prototype.collideWithZombie = function(){
-
+    this.gamestate.setHighscore();
     this.game.physics.p2.clear();
     this.game.state.start('boot', true, true);
  
@@ -103,6 +103,7 @@ Player.prototype.updateTarget = function(){
     var closestDistance = 4000;
     var closest = null;
     var zombies = this.gamestate.zombieGroup.children;
+    
     for(var i = 0; i < zombies.length; i++){
         
         var zombie = zombies[i];

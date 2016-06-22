@@ -1,3 +1,7 @@
+kongregateAPI.loadAPI(function() {
+   window.kongregate = kongregateAPI.getAPI();
+});
+
 var gyroInfo =   {
     gamma: 0,
     alpha: 0,
