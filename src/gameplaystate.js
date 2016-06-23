@@ -36,18 +36,38 @@ function GameplayState(game){
     this.ammoGui = null;
     this.highScore = 0;
     this.score = 0;
+    
+    this.kongregateUserId = 0;
 }
 
-GameplayState.prototype.setHighscore = function(){
+GameplayState.prototype.setHighscore = function(callback){
+    
+    
     this.loadHighscore();
+    
     if(this.highScore <= this.score){
         this.highScore = this.score;
+        if(this.kongregateUserId != 0){
+            window.kongregate.stats.submit("HighScore", this.score);
+            return;
+        }
         localStorage.setItem("goldenBullets_highscore", this.highScore.toString()); 
         alert(localStorage.getItem("goldenBullets_highscore"));
+        
     }
 }
 
 GameplayState.prototype.loadHighscore = function(){
+    if(this.kongregateUserId != 0){
+        $.ajax({
+            url: 'http://http://www.kongregate.com/api/high_scores/lifetime/124807.json?user_id=' + this.kongregateUserId,
+            success: function (result) {
+                if (result.isOk == false) alert(result.message);
+            },
+            async: false
+        });
+        return;
+    }
     this.highScore = localStorage.getItem("goldenBullets_highscore");
     if(this.highScore == null){
            this.highScore = 0;
@@ -90,6 +110,9 @@ GameplayState.prototype.init = function() {
     
     
     this.score = 0;
+    if(window.kongregate != null){
+        this.kongregateUserId = window.kongregate.services.getUserId();
+    }
 }
 
 GameplayState.prototype.createInviWall = function(x, y, w, h){
@@ -116,6 +139,7 @@ GameplayState.prototype.createWalls = function(){
     for(var i = 0; i < this.wallsRows; i++){
         for(var j = 0; j < this.wallsPerRow; j++){
             this.createWall(this.wallsMinX + (Math.random() * (this.wallsMaxX - this.wallsMinX)), 50 * i, 100, 10);
+            
         }
     }
     

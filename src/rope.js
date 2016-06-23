@@ -1,4 +1,4 @@
-function Rope(gamestate){
+ function Rope(gamestate){
     this.gamestate = gamestate;
     this.game = gamestate.game;
     
@@ -21,7 +21,7 @@ function Rope(gamestate){
 
     this.collided = false;
     this.makeMeAlive = false;
-    this.pullImpulseForce = 100; // * deltaTime
+    this.pullImpulseForce = 50; // * deltaTime
     this.maxPullVelocity = 600;
     this.kill();
 }

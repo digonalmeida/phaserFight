@@ -36,8 +36,8 @@ function Player(gamestate){
     
     this.ammoBox.body.collideWorldBounds = true;
     
-    this.walkForce = 3000; // per second
-    this.maxWalkVelocity = 300;
+    this.walkForce = 1500; // per second
+    this.maxWalkVelocity = 150;
     
     this.revive();
 }
@@ -206,5 +206,6 @@ Player.prototype.update = function(){
         }  
 
     }
+    
     
 }
