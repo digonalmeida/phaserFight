@@ -2,6 +2,7 @@ function BootState(game) {
     
     this.game = game;
     console.log("%o", window.kongregate);
+   // this.game.user = new User();
 }
 
 
@@ -16,7 +17,9 @@ BootState.prototype.preload = function() {
 }
 
 BootState.prototype.create = function() {
+    console.log("teste1234");
     this.game.state.add('gameplay', new GameplayState(this.game));
     this.game.state.add('menu', new MainMenu(this.game));
-    this.game.state.start('menu');   
+    this.game.state.add('shop', new ShopScene(this.game));
+    this.game.state.start('shop');   
 }

@@ -41,9 +41,8 @@ function GameplayState(game){
 }
 
 GameplayState.prototype.setHighscore = function(callback){
-    
-    
     this.loadHighscore();
+    
     
     if(this.highScore <= this.score){
         this.highScore = this.score;
@@ -58,6 +57,7 @@ GameplayState.prototype.setHighscore = function(callback){
 }
 
 GameplayState.prototype.loadHighscore = function(){
+    /*
     if(this.kongregateUserId != 0){
         $.ajax({
             url: 'http://http://www.kongregate.com/api/high_scores/lifetime/124807.json?user_id=' + this.kongregateUserId,
@@ -67,7 +67,7 @@ GameplayState.prototype.loadHighscore = function(){
             async: false
         });
         return;
-    }
+    }*/
     this.highScore = localStorage.getItem("goldenBullets_highscore");
     if(this.highScore == null){
            this.highScore = 0;

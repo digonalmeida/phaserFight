@@ -4,9 +4,6 @@ function MainMenu(game){
     this.playerIdText = null;
     this.playerHighscoreText = null;
 
-    this.playerName = "guest";
-    this.playerId = -1;
-    this.playerHighscore = 0;
 }
 
 MainMenu.prototype.createTextButton = function (x, y, text, callback){
@@ -17,9 +14,12 @@ MainMenu.prototype.createTextButton = function (x, y, text, callback){
     text.events.onInputUp.add(callback, this);
 }
 MainMenu.prototype.create = function(){
-    
+    kongregateUser.onChanged.push(this.updateLabels.bind(this));
     this.game.add.sprite(0,0,'menuBackground');
-    this.createTextButton(100, 170, 'Play', function(){console.log('play');});
+    this.createTextButton(100, 170, 'Play', function(){
+        console.log('play');
+        kongregateUser.testUpdateFields();
+                                                      });
     this.playerNameText = this.game.add.text(100,200, '', {fill:'white'});
     this.playerIdText = this.game.add.text(100, 230, '', {fill:'white'});
     this.playerHighscoreText = this.game.add.text(100, 230, '', {fill:'white'});
@@ -27,6 +27,6 @@ MainMenu.prototype.create = function(){
 }
 
 MainMenu.prototype.updateLabels = function(){
-    this.playerNameText.text = 'Playing as ' + this.playerName;
-    this.playerHighscoreText.text = 'Highscore: ' + this.playerHighscore;
+    this.playerNameText.text = 'Playing as ' + kongregateUser.name;
+    this.playerHighscoreText.text = 'Highscore: ' + kongregateUser.highscore;
 }
