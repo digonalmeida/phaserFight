@@ -44,14 +44,15 @@ GameplayState.prototype.setHighscore = function(callback){
     this.loadHighscore();
     
     
-    if(this.highScore <= this.score){
+    if(kongregateUser.highScore <= this.score){
+        /*
         this.highScore = this.score;
         if(this.kongregateUserId != 0){
             window.kongregate.stats.submit("HighScore", this.score);
             return;
-        }
-        localStorage.setItem("goldenBullets_highscore", this.highScore.toString()); 
-        alert(localStorage.getItem("goldenBullets_highscore"));
+        }*/
+        localStorage.setItem("goldenBullets_highscore", kongregateUser.highScore.toString()); 
+        //alert(localStorage.getItem("goldenBullets_highscore"));
         
     }
 }
@@ -68,13 +69,35 @@ GameplayState.prototype.loadHighscore = function(){
         });
         return;
     }*/
-    this.highScore = localStorage.getItem("goldenBullets_highscore");
-    if(this.highScore == null){
-           this.highScore = 0;
+    kongregateUser.highScore = localStorage.getItem("goldenBullets_highscore");
+    if(kongregateUser.highScore == null){
+           kongregateUser.highScore = 0;
     }
     else
     {
-        this.highScore = parseInt(this.highScore);  
+        kongregateUser.highScore = parseInt(kongregateUser.highScore);  
+    }
+}
+
+function loadHighscore(){
+    /*
+    if(this.kongregateUserId != 0){
+        $.ajax({
+            url: 'http://http://www.kongregate.com/api/high_scores/lifetime/124807.json?user_id=' + this.kongregateUserId,
+            success: function (result) {
+                if (result.isOk == false) alert(result.message);
+            },
+            async: false
+        });
+        return;
+    }*/
+    kongregateUser.highScore = localStorage.getItem("goldenBullets_highscore");
+    if(kongregateUser.highScore == null){
+           kongregateUser.highScore = 0;
+    }
+    else
+    {
+        kongregateUser.highScore = parseInt(kongregateUser.highScore);  
     }
 }
 
@@ -255,7 +278,7 @@ GameplayState.prototype.update = function(){
     
     this.pointsGui.text = "Points: " + this.score;
     this.ammoGui.text = "Ammo: " +this.player.gun.ammo;
-    this.highScoreGui.text = "Highscore: " + this.highScore;
+    this.highScoreGui.text = "Highscore: " + kongregateUser.highScore;
    // this.game.debug.text('Living: ' + this.zombieGroup.countLiving() + '   Dead: ' + this.zombieGroup.countDead(), 32, 64);
     
 }

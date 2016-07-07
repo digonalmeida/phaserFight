@@ -1,24 +1,4 @@
- 
-// The callback function
-function onUserItems(result){
-  trace("User item list received, success: " + result.success);
-  if( result.success ){
-    for( var i = 0; i < result.data.length; i++ ){
-      var item = result.data[i];
-      trace((i+1) + ". " + item.identifier + ", " + item.id + "," + item.data);
-    }
-  }
-}
- 
-function onItemList(result){
-  trace("Item list result, success: " + result.success);
-  if( result.success ){
-    for( var i = 0; i < result.data.length; i++ ){
-      var item = result.data[i];
-      trace((i+1) + ". " + item.identifier + ", " + item.id + "," + item.name);
-    }
-  }
-}
+
 
 function ShopScene(game){
     this.game = game;
@@ -31,15 +11,8 @@ ShopScene.prototype.createTextButton = function (x, y, text, callback){
     text.events.onInputUp.add(callback, this);
 }
 ShopScene.prototype.create = function(){
-    if(window.kongregate.services.isGuest()){
-      window.kongregate.services.showRegistrationBox();
-    }
 
-    this.createTextButton(0,0,"Comprar Kreds", function(){
-        window.kongregate.services.showKredPurchaseDialog();
-
-    });
-    this.createTextButton(0,30,"Comprar Kreds 2", function(){
+    this.createTextButton(0,30,"Comprar Kreds", function(){
         window.kongregate.mtx.showKredPurchaseDialog("offers");
         kongregate.chat.displayMessage("Hi there!","BenV");
     });
@@ -47,11 +20,46 @@ ShopScene.prototype.create = function(){
         kongregate.chat.displayMessage("Hi there!","BenV");
     });
     this.createTextButton(0,90,"itens", function(){
-        kongregate.mtx.requestItemList([], onItemList);
+        kongregate.mtx.requestItemList([], this.onItemList.bind(this));
     });
-    this.createTextButton(0,120,"userItems", function(){
+    this.createTextButton(180,90,"userItems", function(){
         // Request the inventory for the current player
-        kongregate.mtx.requestUserItemList(null, onUserItems);
+        kongregate.mtx.requestUserItemList(null, this.onUserItems.bind(this));
+    });
+    this.createTextButton(0,0,"menu", function(){
+        // Request the inventory for the current player
+        this.game.state.start('menu');;
     });
     
 }
+ 
+// The callback function
+ShopScene.prototype.onUserItems = function(result){
+    console.log("%o", result);
+  if( result.success ){
+    for( var i = 0; i < result.data.length; i++ ){
+      var item = result.data[i];
+    this.createTextButton(180, 180 + (i * 20),item.identifier, function(){
+        console.log("teste item");
+    })
+    }
+  }
+}
+ 
+ShopScene.prototype.onItemList = function(result){
+  if( result.success ){
+    for( var i = 0; i < result.data.length; i++ ){
+      var item = result.data[i];
+      this.createTextButton(0, 180 + (i * 20),item.identifier, function(){
+        kongregate.mtx.purchaseItems([item.identifier], onPurchaseResult);
+    })
+    }
+  }
+}
+
+
+ 
+function onPurchaseResult(result){
+  console.log("Purchase success:" + result.success);
+}
+

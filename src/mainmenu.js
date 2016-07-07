@@ -17,9 +17,11 @@ MainMenu.prototype.create = function(){
     kongregateUser.onChanged.push(this.updateLabels.bind(this));
     this.game.add.sprite(0,0,'menuBackground');
     this.createTextButton(100, 170, 'Play', function(){
-        console.log('play');
-        kongregateUser.testUpdateFields();
-                                                      });
+        this.game.state.start('gameplay');
+    });
+    this.createTextButton(100, 260, 'Shop', function(){
+        this.game.state.start('shop');
+    });
     this.playerNameText = this.game.add.text(100,200, '', {fill:'white'});
     this.playerIdText = this.game.add.text(100, 230, '', {fill:'white'});
     this.playerHighscoreText = this.game.add.text(100, 230, '', {fill:'white'});
@@ -27,6 +29,7 @@ MainMenu.prototype.create = function(){
 }
 
 MainMenu.prototype.updateLabels = function(){
+    loadHighscore();
     this.playerNameText.text = 'Playing as ' + kongregateUser.name;
-    this.playerHighscoreText.text = 'Highscore: ' + kongregateUser.highscore;
+    this.playerHighscoreText.text = 'Highscore: ' + kongregateUser.highScore;
 }
