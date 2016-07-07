@@ -1,79 +1,68 @@
 function Player(gamestate){
-    
-     this.beta = 0;
-    
-    
     this.gamestate = gamestate;
     this.game = this.gamestate.game;
     
     Phaser.Sprite.call(this, this.game, 100, 100, "player");
-
-    this.gun = new Gun(this);
-    //this.addChild(this.gun);
     this.anchor.setTo(0.5,0.5);
+    
+    this.game.physics.p2.enable(this);
+    //this.body.collideWorldBounds = true;
+    this.body.setCollisionGroup(this.gamestate.playerCollisionGroup);
+    this.body.collides([this.gamestate.wallCollsionGroup, this.gamestate.inviWallCollisionGroup]);
+    this.body.collides(this.gamestate.ammoCollisionGroup, this.collideWithAmmo, this);
+    this.body.collides(this.gamestate.zombieCollisionGroup, this.collideWithZombie, this);
+    
+    //this.body.debug = true;
     
     this.game.add.existing(this);
     
-    this.direction;
-    this.aimDirection;
-    this.target;
-    this.angle = 0;
+    this.shotInterval = 0.1;
+    this.targetDistance = 4000;
+    this.aimDirection = {x: 1, y :0}; 
+    this.target = null;
+    this.walkSpeed = 0;
     
     this.inputEnabled = true;
     
+    this.rope = new Rope(this.gamestate);
+    this.gun = new Gun(this);
     
-    this.shotInterval = 0.1;
-    
-    this.game.physics.arcade.enable(this);
-    this.body.allowGravity = true;
-    
-    
-    this.game.input.keyboard.onDownCallback = this.throwRope.bind(this);
-    this.game.input.keyboard.onUpCallback = this.keyUp.bind(this);
-     this.game.input.keyboard.onDownCallback = this.keyDown.bind(this);
-    this.rope = new Rope(this.game);
-    
-    this.walkSpeed = 0;
-    this.canJump = true;
-    this.body.collideWorldBounds = true;
-    
-   	this.targetDistance = 4000;
-    
-    this.points = 0;
-    this.gui = this.game.add.group();
-    
-    this.pointsGui = this.game.add.text(200,0,"Points:" + this.points, {fill:'yellow'});
 
-    this.ammoGui = this.game.add.text(350,0,"Ammo:" + this.gun.ammo, {fill:'yellow'});
-    this.gui.add(this.pointsGui);
-    this.gui.add(this.ammoGui);
-    this.gui.fixedToCamera = true;
     this.ammoBox = this.game.add.sprite(10,10,"player");
-    
-    this.game.physics.enable(this.ammoBox);
+    this.game.physics.p2.enable(this.ammoBox);
+    this.ammoBox.body.setCollisionGroup(this.gamestate.ammoCollisionGroup);
+    this.ammoBox.body.collides([this.gamestate.playerCollisionGroup, this.gamestate.wallCollsionGroup, this.gamestate.inviWallCollisionGroup]);
+    this.game.physics.p2.enable(this.ammoBox);
     
     this.ammoBox.body.collideWorldBounds = true;
     
+    this.walkForce = 1500; // per second
+    this.maxWalkVelocity = 150;
+    
+    this.revive();
 }
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
 
-Player.prototype.keyDown = function(event){
-    if(event.keyCode == Phaser.KeyCode.SPACEBAR){
-        this.throwRope();
+
+Player.prototype.setCollideWithWalls = function(c){
+    if(c){
+        this.body.removeCollisionGroup(this.gamestate.wallCollsionGroup)
+    }
+    else{
+        this.body.collides(this.gamestate.wallCollsionGroup)
     }
 }
-Player.prototype.keyUp = function(event){
-    if(event.keyCode == Phaser.KeyCode.SPACEBAR){
-        this.killRope();
-    }
-}
+
 Player.prototype.killRope = function(){
     this.rope.kill();
 }
+
 Player.prototype.throwRope = function(){
+    
     if(!this.rope.alive){
+       // this.collideWithZombie();
         var dir;
         if(this.scale.x < 0){
             dir = {x: -0.5, y: -1};
@@ -95,31 +84,26 @@ Player.prototype.updateAim = function(){
     }
 }
 
-
-
-Player.prototype.collideWithFloor = function(){
-    this.canJump = true;   
-}
 Player.prototype.collideWithZombie = function(){
-    alert("game over. " + this.points + " points");
-    this.game.state.start('boot');
+    this.gamestate.setHighscore();
+    this.game.physics.p2.clear();
+    this.game.state.start('boot', true, true);
+ 
+
 }
 
 Player.prototype.collideWithAmmo = function(){
+    console.log("ammo hit");
     this.gun.ammo += 20;
-    this.ammoBox.x = Math.random() * 500;
-    this.ammoBox.y = Math.random() * 500;
-}
-
-Player.prototype.jump = function(){
-    this.body.velocity.y = -200;   
-    this.canJump = false;
+    this.ammoBox.body.x = Math.random() * 500;
+    this.ammoBox.body.y = Math.random() * 500;
 }
 
 Player.prototype.updateTarget = function(){
     var closestDistance = 4000;
     var closest = null;
     var zombies = this.gamestate.zombieGroup.children;
+    
     for(var i = 0; i < zombies.length; i++){
         
         var zombie = zombies[i];
@@ -143,21 +127,20 @@ Player.prototype.updateTarget = function(){
         }
         
     }
-    
-   
     this.target = closest;
-   // this.game.debug.spriteInfo(this.target,0,100);
     this.targetDistance = closestDistance;
 }
+
 Player.prototype.update = function(){
-    //this.gui.bringToTop();
-    this.pointsGui.text = "Points: " + this.points;
-    this.ammoGui.text = "Ammo: " +this.gun.ammo;
-    this.game.debug.text(gyroInfo.beta, 0, 200);
     this.updateTarget();
     this.updateAim();
     
-    var acceleration = 500;
+    if(this.body.velocity.y > 0){
+        this.setCollideWithWalls(false);
+    }
+    else{
+         this.setCollideWithWalls(true);
+    }
     
     if(this.walkSpeed < 0){
         this.scale.x = -1;
@@ -168,99 +151,61 @@ Player.prototype.update = function(){
         this.gun.scale.y = 1;
     }
     
-    var right = false;
-    var left = false;
+    var rightInput = false;
+    var leftInput = false;
     
     if(Phaser.Device.desktop){
 
-        left = this.game.input.keyboard.isDown(Phaser.KeyCode.A);
+        leftInput = this.game.input.keyboard.isDown(Phaser.KeyCode.A);
         
-        right = this.game.input.keyboard.isDown(Phaser.KeyCode.D);
-        
-
-        if(this.game.input.keyboard.isDown(Phaser.KeyCode.W) &&
-          this.canJump){
-
-               this.jump();
-        }
-
+        rightInput = this.game.input.keyboard.isDown(Phaser.KeyCode.D);
     }
     else{
         var pointers = [this.game.input.pointer1,
                        this.game.input.pointer2,
                        this.game.input.activePointer];
         for(var i = 0; i < pointers.length; i++){
-            
-            
+
             var pointer = pointers[i];//@pointer = new
             if(pointer.isDown){
-                console.log("here");
                 if(pointer.x > this.game.width/2){
-                    right = true;   
+                    rightInput = true;   
                 }
                 else{
-                    left = true;   
+                    leftInput = true;   
                 }
             }
-            
-            
         }
-        /*
-         if(gyroInfo.beta < 0){
-            right = true;  
-         }
-        else{
-            left = true;
-        }*/
     }
-    if(left && right){
+    
+    
+    if(leftInput && rightInput){
         this.throwRope();   
     }
     else{
         this.killRope();
-        if(!left && !right){
+        
+        if(!leftInput && !rightInput){
             this.walkSpeed = 0;   
         }
-        else if(left){
-            this.walkSpeed = - 300;   
+        else if(leftInput){
+            this.walkSpeed = - 1;   
         }
-        else if(right){
-            this.walkSpeed = 300;
+        else if(rightInput){
+            this.walkSpeed = 1;
         }
     }   
    
+    var deltatime = this.game.time.elapsed / 1000;
     
     if(!this.rope.alive || !this.rope.collided){
-
-        if(this.walkSpeed > this.body.velocity.x && this.walkSpeed > -1){
-            if(this.body.velocity.x < 300){
-                this.body.velocity.x += acceleration* (this.game.time.elapsed/1000);
-            }
-        }
-        if(this.walkSpeed < this.body.velocity.x && this.walkSpeed < 1){
-            if(this.body.velocity.x > -300){
-                this.body.velocity.x -= acceleration* (this.game.time.elapsed/1000);
-            }
-            
-        }
         
-    }
+        if((this.body.velocity.x >= -this.maxWalkVelocity && this.walkSpeed < 0) ||
+         (this.body.velocity.x <= this.maxWalkVelocity && this.walkSpeed > 0)){
+            this.body.applyForce([-this.walkSpeed * deltatime * this.walkForce, 0], 0, 0);
+        }  
 
-    
-    if(this.rope.alive){
-        this.game.physics.arcade.collide(this.rope, this.gamestate.wallGroup, this.rope.onCollideWall, null, this.rope);
     }
-    this.game.physics.arcade.overlap(this, this.ammoBox, this.collideWithAmmo, null, this);
-    this.game.physics.arcade.collide(this.ammoBox, this.gamestate.wallGroup);
     
-    //if(this.game.input.activePointer.isDown){
-    //    this.throwRope();   
-    //}
-    //else{
-    //    this.killRope();   
-    //}
-    //this.game.debug.cameraInfo(this.game.camera, 32, 32);
-   // this.game.debug.spriteCoords(this, 32, 500);
     
 }
-

@@ -1,3 +1,7 @@
+kongregateAPI.loadAPI(function() {
+   window.kongregate = kongregateAPI.getAPI();
+});
+
 var gyroInfo =   {
     gamma: 0,
     alpha: 0,
@@ -16,6 +20,7 @@ window.onload = function(){
     
     var game = new Phaser.Game(640, 360, Phaser.AUTO, 'Phaser Fighter');
     game.state.add('boot', new BootState(game));
+    game.state.add('boot2', {create: function(){this.state.start('boot');}.bind(game)});
     game.state.start('boot');
 }
 

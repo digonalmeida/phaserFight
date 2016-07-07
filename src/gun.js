@@ -17,13 +17,18 @@ function Gun(player){
     for(var i = 0; i < 50; i++){
         var shot = this.game.add.sprite(0,0,'shot');
         //shot.scale.setTo(2,2);
-        this.game.physics.enable(shot);
+        this.game.physics.p2.enable(shot);
+        shot.body.setCollisionGroup(this.gamestate.shotsCollisionGroup);
+        
         shot.kill();
+        shot.fixedRotation = true;
         shot.target = null;
         shot.checkWorldBounds = true;
         shot.outOfBoundsKill = true;
         this.shots.add(shot, true);
         shot.body.allowGravity = false;
+        
+        shot.body.collides(this.gamestate.zombieCollisionGroup, this.shotCollideEnemy, this);
     }
     this.shotInterval = 0.2;
     this.canShoot = true;
@@ -45,11 +50,12 @@ Gun.prototype.shot = function(){
         shot = this.shots.getFirstAlive(false);
     }
     shot.outOfBoundsKill = true;
-    shot.x = this.x;
-    shot.y = this.y;
+    shot.body.x = this.x;
+    shot.body.y = this.y;
     
     
-    shot.body.velocity.setTo(this.direction.x*this.shotSpeed, this.direction.y*this.shotSpeed);
+    shot.body.velocity.x = this.direction.x*this.shotSpeed;
+    shot.body.velocity.y = this.direction.y*this.shotSpeed;
     //shot.body.velocity.x += this.player.body.velocity.x;
     //shot.body.velocity.y += this.player.body.velocity.y;
     shot.rotation = this.rotation;
@@ -65,19 +71,8 @@ Gun.prototype.shot = function(){
 Gun.prototype.update = function(){
     this.game.debug.text('shots Living: ' + this.shots.countLiving() + '   Dead: ' + this.shots.countDead(), 32, 50);
     
-   // this.game.debug.text('x: ' + this.direction.x + '   y: ' + this.direction.y , 32, 100);
-   //var g = new Phaser.Game;
-    //this.game.debug.text("teste", 0, 100);
-    //console.log(mx + ", " + my);
     this.direction = this.player.aimDirection;
-    /*
-    if(this.player.target != null){
-        this.direction = Vec.aimDirection(this.player, this.shotSpeed,
-                                      this.player.target,
-                                      this.player.target.body.velocity);
-    }    */                          
-                                      
-    
+         
     var angle = Math.acos(this.direction.x);
     if(this.direction.y < 0){
      angle = -angle;   
@@ -97,7 +92,6 @@ Gun.prototype.update = function(){
     var target = this.player.target;
     if(target != null){
         if(this.canShoot && this.ammo > 0){
-            //console.log(this.player.targetDistance);
             if(this.player.targetDistance < 150){
                 this.shot();   
             }
@@ -109,10 +103,10 @@ Gun.prototype.update = function(){
 }
 
 Gun.prototype.shotCollideEnemy = function(shot, enemy){
-    shot.kill();
-    enemy.life--;
-    if(enemy.life <= 0){
-        enemy.kill();
+    shot.sprite.kill();
+    enemy.sprite.life--;
+    if(enemy.sprite.life <= 0){
+        enemy.sprite.kill();
     }
-    this.player.points++;
+    this.gamestate.score++;
 }

@@ -1,7 +1,8 @@
-function Rope(game){
-    this.game = game;
+ function Rope(gamestate){
+    this.gamestate = gamestate;
+    this.game = gamestate.game;
     
-    Phaser.Sprite.call(this, game, 0,0, "floor a");
+    Phaser.Sprite.call(this, this.game, 0,0, "floor a");
     this.game.add.existing(this);
     this.width = 3;
     this.height = 3;
@@ -10,14 +11,18 @@ function Rope(game){
     
     this.graphics = this.game.add.graphics(0,0);
     
-    this.game.physics.arcade.enable(this);
-    this.body.allowGravity = false;
-    
-    
-    //this.onKilled.add(function(this.graphics.kill()).bind(this));
+    this.game.physics.p2.enable(this);
+    this.body.setRectangle(3,3);
+    this.body.gravity.y = 0;
+    this.body.debug = true;
+
+    this.body.setCollisionGroup(this.gamestate.ropeCollisionGroup);
+    this.body.collides(this.gamestate.wallCollsionGroup, this.onCollideWall, this);
+
     this.collided = false;
     this.makeMeAlive = false;
-    this.forceAcceleration = 30;
+    this.pullImpulseForce = 50; // * deltaTime
+    this.maxPullVelocity = 600;
     this.kill();
 }
 
@@ -27,34 +32,43 @@ Rope.prototype.constructor = Rope;
 
 Rope.prototype.throw = function(origin, direction){
     this.makeMeAlive = true;
+    this.body.static = false;
     this.collided = false;
     this.origin = origin;
     this.direction = direction;
-    this.x = origin.x;
-    this.y = origin.y;
-    
+
+    this.body.x = origin.body.x;
+    this.body.y = origin.body.y;
     this.body.velocity.x = direction.x * 800;
     this.body.velocity.y = direction.y * 800;
+    //this.body.applyForce([direction.x * 2000, -direction.y * 2000], 0, 0);
 }
-Rope.prototype.onCollideWall = function(me, other){
-
+Rope.prototype.onCollideWall = function(obj1, obj2){
+    
     if(!this.alive){
         return;
     }
     if(this.collided){
         return;
     }
-    
+   // console.log("rope hit %o %o", obj1, obj2);
     this.collided = true;
-    this.body.velocity.setTo(0,0);
+    //this.body.x = obj1.x;
+   // this.body.y = obj1.y;
     
+    this.body.velocity.x = 0;
+    this.body.velocity.y = 0;
+    this.body.static = true;
 }
 Rope.prototype.update = function(){
+    
     if(this.makeMeAlive){
         this.makeMeAlive = false;
         this.revive();
     }
+    
     this.graphics.clear();
+    
     if(!this.alive){
         return;
     }
@@ -62,20 +76,22 @@ Rope.prototype.update = function(){
     this.graphics.beginFill(0xff3300);
     this.graphics.lineStyle(2, 0xffd900, 1);
     
-    
     if(this.origin == null){
         return;
     }
     // draw a shape
-    this.graphics.moveTo(this.x,this.y);
-    this.graphics.lineTo(this.origin.x, this.origin.y);
+    this.graphics.moveTo(this.body.x,this.body.y);
+    this.graphics.lineTo(this.origin.body.x, this.origin.body.y);
     if(this.collided){
-        var d = {x: this.x - this.origin.x,
-                y: this.y - this.origin.y};
-        var mod = Math.sqrt(Math.pow(d.x,2) + Math.pow(d.y,2));
-        var d = {x: d.x/mod, y: d.y/mod};
-        this.origin.body.velocity.x += (d.x * 1000)*(this.game.time.elapsed/1000);
-        this.origin.body.velocity.y += (d.y * 1000)*(this.game.time.elapsed/ 1000);
+        
+        var d = Vec.normalized(Vec.sub(this, this.origin));
+        
+        var deltatime = this.game.time.elapsed/ 1000;
+        //
+        if(Vec.mod(this.origin.body.velocity) < this.maxPullVelocity){
+            var impulseForce = Vec.mult(d, this.pullImpulseForce * deltatime);
+            this.origin.body.applyImpulse([-impulseForce.x, -impulseForce.y], 0,0);
+        }
     }
     
 }

@@ -10,14 +10,20 @@ function Zombie(gamestate){
     this.game.add.existing(this);
     this.gamestate.zombieGroup.add(this);
     this.direction = {x:0, y:1};
-
+    
     this.canShoot = true;
     this.shotInterval = 0.4;
-    
-    this.game.physics.arcade.enable(this);
-    this.body.allowGravity = true;
-    
+    this.shouldDie = false;;
+    this.game.physics.p2.enable(this);
+    this.body.fixedRotation = true;
+    this.body.collideWorldBounds = true;
+    this.body.setCollisionGroup(this.gamestate.zombieCollisionGroup);
+    this.body.collides(this.gamestate.playerCollisionGroup);
+    this.body.collides(this.gamestate.wallCollsionGroup);
+    this.body.collides(this.gamestate.inviWallCollisionGroup, function(){this.shouldDie = true;}, this);
+    this.body.collides(this.gamestate.shotsCollisionGroup);
     this.shots = this.game.add.group();
+    
     for(var i = 0; i < 20; i++){
         var shot = this.game.add.sprite(0,0,'shot');
         
@@ -26,7 +32,7 @@ function Zombie(gamestate){
     }
 
     this.life = 1;
-    this.walkSpeed = 0;
+    this.walkSpeed = -1 + (Math.random() * 2) ;
     this.canJump = true;
     this.body.collideWorldBounds = true;
 }
@@ -59,6 +65,14 @@ Zombie.prototype.collideWithFloor = function(){
 }
 
 Zombie.prototype.update = function(){
+    if(this.shouldDie){
+        this.kill();
+        this.shouldDie = false;
+        return;
+    }
+    if(!this.alive){
+        return;
+    }
     var player = this.gamestate.player;
     var distance = Math.sqrt(Math.pow((this.x - player.x),2) + Math.pow((this.y - player.y),2));
     
@@ -80,7 +94,7 @@ Zombie.prototype.update = function(){
             }
     }
     else{
-        this.walkSpeed = 0;
+       // this.walkSpeed = 0;
        // this.flySpeed = 0;
     }
 
@@ -97,6 +111,6 @@ Zombie.prototype.update = function(){
 }
 
 Zombie.prototype.jump = function(){
-    this.body.velocity.y = -200;   
+    this.body.applyForce([0, -200], 0, 0);   
     this.canJump = false;
 }
